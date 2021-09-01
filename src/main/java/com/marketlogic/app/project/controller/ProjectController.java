@@ -4,15 +4,10 @@ import com.marketlogic.app.common.error.AppServiceException;
 import com.marketlogic.app.common.error.ErrorCode;
 import com.marketlogic.app.project.dto.ProjectDTO;
 import com.marketlogic.app.project.dto.ProjectResponse;
-import com.marketlogic.app.project.entity.Project;
 import com.marketlogic.app.project.service.ProjectService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/project", produces = MediaType.APPLICATION_JSON_VALUE)
+@Api(value = "Endpoints are used to create/update/delete the projects")
 public class ProjectController {
 
     @Autowired
