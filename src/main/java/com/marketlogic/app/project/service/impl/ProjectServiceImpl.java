@@ -4,6 +4,7 @@ import com.marketlogic.app.common.error.AppServiceException;
 import com.marketlogic.app.common.error.ErrorCode;
 import com.marketlogic.app.project.constants.Status;
 import com.marketlogic.app.project.dto.ProjectDTO;
+import com.marketlogic.app.project.dto.ProjectResponse;
 import com.marketlogic.app.project.entity.Project;
 import com.marketlogic.app.project.entity.ProjectRecord;
 import com.marketlogic.app.project.repository.ProjectRecordRepository;
@@ -13,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -43,20 +43,34 @@ public class ProjectServiceImpl implements ProjectService {
     private String topicPublishProject;
 
     @Override
-    public Page<Project> findAll(int page, int size) {
+    public ProjectResponse findAll(int page, int size) {
         Pageable pageable = PageRequest.of(
                 page,
                 size
         );
-        return projectRepository.findAll(pageable);
+        var pageableProject = projectRepository.findAll(pageable);
+        var projectResponse = new ProjectResponse();
+        projectResponse.setContent(pageableProject.getContent().stream()
+                .map(project -> modelMapper.map(project, ProjectDTO.class))
+                .collect(Collectors.toList()));
+        projectResponse.setTotalElements(pageableProject.getTotalElements());
+        projectResponse.setTotalPages(pageableProject.getTotalPages());
+        projectResponse.setNumberOfElements(pageableProject.getNumberOfElements());
+        projectResponse.setSize(pageableProject.getSize());
+        return projectResponse;
+
     }
 
     @Override
     public ProjectDTO findById(long projectId) {
         var project = projectRepository.findById(projectId);
+        validateProject(project);
+        return modelMapper.map(project, ProjectDTO.class);
+    }
+
+    private void validateProject(Project project) {
         if (project == null)
             throw new AppServiceException(ErrorCode.PROJECT_NOT_FOUND);
-        return modelMapper.map(project, ProjectDTO.class);
     }
 
     @Override
@@ -74,9 +88,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectDTO update(long projectId, ProjectDTO projectDTO) {
         var project = projectRepository.findById(projectId);
-        if (project == null) {
-            throw new AppServiceException(ErrorCode.PROJECT_NOT_FOUND);
-        }
+        validateProject(project);
         var projectEntity = modelMapper.map(projectDTO, Project.class);
         if (projectEntity != null && project.getStatus() != Status.PUBLISHED) {
             if (projectEntity.getSections() != null && !projectEntity.getSections().isEmpty())
@@ -90,19 +102,15 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void deleteById(long projectId) {
         var project = projectRepository.findById(projectId);
-        if (project == null) {
-            throw new AppServiceException(ErrorCode.PROJECT_NOT_FOUND);
-        } else {
-            projectRepository.delete(project);
-        }
+        validateProject(project);
+        projectRepository.delete(project);
     }
 
     @Override
     public void publishById(long projectId) {
         var project = projectRepository.findById(projectId);
-        if (project == null) {
-            throw new AppServiceException(ErrorCode.PROJECT_NOT_FOUND);
-        } else if (project.getStatus().equals(Status.PUBLISHED)) {
+        validateProject(project);
+        if (project.getStatus().equals(Status.PUBLISHED)) {
             throw new AppServiceException(ErrorCode.CONFLICTS);
         } else {
             project.setStatus(Status.PUBLISHED);
@@ -114,22 +122,26 @@ public class ProjectServiceImpl implements ProjectService {
                 projectRecord.setProject(project);
                 projectRecordRepository.save(projectRecord);
             }
-            try {
-                log.debug("Notifying project publish to consumers through Kafka -> {}", project.getTitle());
-                var content = new StringBuilder(project.getTitle())
-                        .append(" ")
-                        .append(project.getDescription())
-                        .append(" ");
-                if (project.getSections() != null && !project.getSections().isEmpty()) {
-                    content.append(project.getSections().stream()
-                            .map(section -> section.getTitle() + " " + section.getDescription())
-                            .collect(Collectors.joining(" ")));
-                }
-                this.kafkaTemplate.send(topicPublishProject,
-                        String.format("{\"id\":%s, \"content\":\"%s\"}", project.getId(), content));
-            } catch (Exception e) {
-                log.error("Exception while notifying machine config changes {} through Kafka: ", project.getTitle(), e);
+            sendProjectRecordToSearchService(project);
+        }
+    }
+
+    private void sendProjectRecordToSearchService(Project project) {
+        try {
+            log.debug("Notifying project publish to consumers through Kafka -> {}", project.getTitle());
+            var content = new StringBuilder(project.getTitle())
+                    .append(" ")
+                    .append(project.getDescription())
+                    .append(" ");
+            if (project.getSections() != null && !project.getSections().isEmpty()) {
+                content.append(project.getSections().stream()
+                        .map(section -> section.getTitle() + " " + section.getDescription())
+                        .collect(Collectors.joining(" ")));
             }
+            this.kafkaTemplate.send(topicPublishProject,
+                    String.format("{\"id\":%s, \"content\":\"%s\"}", project.getId(), content));
+        } catch (Exception e) {
+            log.error("Exception while notifying machine config changes {} through Kafka: ", project.getTitle(), e);
         }
     }
 }

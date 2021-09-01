@@ -1,29 +1,34 @@
 package com.marketlogic.app.config;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.kafka.core.ProducerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @TestConfiguration
-@SpringBootTest
-@DirtiesContext
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
 public class TestKafkaProducerConfig {
 
-    @Autowired
-    private KafkaProducer producer;
+    @Bean
+    public ProducerFactory<String, String> producerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigs());
+    }
 
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    @Bean
+    public Map<String, Object> producerConfigs() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        return props;
+    }
 
     @Bean
     public KafkaTemplate<String, String> kafkaTemplate() {
-        kafkaTemplate.setDefaultTopic("ProjectPublish");
+        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory());
+        kafkaTemplate.setDefaultTopic("PublishProject");
         return kafkaTemplate;
     }
 }
