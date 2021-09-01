@@ -19,14 +19,7 @@
     <properties>
         <java.version>11</java.version>
         <swagger.version>2.9.2</swagger.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven-surefire-plugin-reporting.version>2.21.0</maven-surefire-plugin-reporting.version>
-        <jacoco.reportPath>${project.basedir}/../target/jacoco.exec</jacoco.reportPath>
-        <!-- Sonar -->
-        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.language>java</sonar.language>
+        <spring-statemachine-core.version>2.2.0.RELEASE</spring-statemachine-core.version>
     </properties>
 
     <dependencies>
