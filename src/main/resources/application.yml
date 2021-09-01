@@ -40,6 +40,13 @@ kafka:
   value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
   topics:
     PublishProject: PublishProject
+logging:
+  level:
+    io:
+      swagger:
+        models:
+          parameters:
+            AbstractSerializableParameter: error
 ---
 
 spring:
