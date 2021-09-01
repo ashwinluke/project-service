@@ -48,14 +48,16 @@ logging:
           parameters:
             AbstractSerializableParameter: error
 ---
-
 spring:
   profiles: test
-
 ---
-
 spring:
   profiles: dev
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
   datasource:
 #    url: jdbc:h2:mem:${spring.application.name}
 #    username: root
@@ -71,3 +73,8 @@ log4j:
   logger:
     org.springframework: DEBUG
     com.saurer: DEBUG
+logging:
+  level:
+    org:
+      hibernate:
+        type: DEBUG
