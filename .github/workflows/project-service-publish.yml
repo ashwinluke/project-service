@@ -4,7 +4,7 @@ on:
     branches:
       - master
 env:
-  DOCKER_IMAGE: santhoshas1990/product-service
+  DOCKER_IMAGE: santhoshas1990/project-service
   TAG: latest
 
 jobs:
