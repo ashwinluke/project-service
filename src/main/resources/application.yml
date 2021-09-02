@@ -5,7 +5,7 @@ spring:
   application:
     name: projectservice
   datasource:
-    url: jdbc:mysql://localhost:3306/${spring.application.name}
+    url: jdbc:mysql://db:3306/${spring.application.name}
     username: root
     password: root
     driver-class-name: org.mariadb.jdbc.Driver
@@ -35,7 +35,7 @@ server:
     mime-types: application/json
 kafka:
   bootstrap:
-    servers: localhost:9092
+    servers: kafka:9092
   key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
   value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
   topics:
@@ -59,6 +59,10 @@ spring:
       hibernate:
         format_sql: true
   datasource:
+    url: jdbc:mysql://localhost:3306/${spring.application.name}
+kafka:
+  bootstrap:
+    servers: localhost:9092
 #    url: jdbc:h2:mem:${spring.application.name}
 #    username: root
 #    password: root
