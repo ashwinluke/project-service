@@ -10,4 +10,6 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, I
 
     Project findById(long id);
 
+    Project save(Project project);
+
 }
