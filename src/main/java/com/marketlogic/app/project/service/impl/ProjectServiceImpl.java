@@ -49,6 +49,7 @@ public class ProjectServiceImpl implements ProjectService {
                 size
         );
         var pageableProject = projectRepository.findAll(pageable);
+        log.debug("Retrieved project successfully!");
         var projectResponse = new ProjectResponse();
         projectResponse.setContent(pageableProject.getContent().stream()
                 .map(project -> modelMapper.map(project, ProjectDTO.class))
@@ -57,6 +58,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectResponse.setTotalPages(pageableProject.getTotalPages());
         projectResponse.setNumberOfElements(pageableProject.getNumberOfElements());
         projectResponse.setSize(pageableProject.getSize());
+        log.debug("Response prepared successfully!");
         return projectResponse;
 
     }
@@ -69,8 +71,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void validateProject(Project project) {
-        if (project == null)
+        if (project == null) {
+            log.error("Project not found");
             throw new AppServiceException(ErrorCode.PROJECT_NOT_FOUND);
+        }
     }
 
     @Override
@@ -81,6 +85,7 @@ public class ProjectServiceImpl implements ProjectService {
                 projectEntity.getSections().forEach(section -> section.setProject(projectEntity));
             return modelMapper.map(projectRepository.save(projectEntity), ProjectDTO.class);
         } else {
+            log.error("Invalid project details");
             throw new AppServiceException(ErrorCode.BAD_REQUEST);
         }
     }
@@ -95,6 +100,7 @@ public class ProjectServiceImpl implements ProjectService {
                 projectEntity.getSections().forEach(section -> section.setProject(projectEntity));
             return modelMapper.map(projectRepository.save(projectEntity), ProjectDTO.class);
         } else {
+            log.error("Invalid project details");
             throw new AppServiceException(ErrorCode.BAD_REQUEST);
         }
     }
@@ -111,6 +117,7 @@ public class ProjectServiceImpl implements ProjectService {
         var project = projectRepository.findById(projectId);
         validateProject(project);
         if (project.getStatus().equals(Status.PUBLISHED)) {
+            log.error("Project published already");
             throw new AppServiceException(ErrorCode.CONFLICTS);
         } else {
             project.setStatus(Status.PUBLISHED);
@@ -121,6 +128,7 @@ public class ProjectServiceImpl implements ProjectService {
                     projectRecord.getSectionRecords().forEach(section -> section.setProjectRecord(projectRecord));
                 projectRecord.setProject(project);
                 projectRecordRepository.save(projectRecord);
+                log.info("ProjectRecord saved successfully");
             }
             sendProjectRecordToSearchService(project);
         }
@@ -128,7 +136,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void sendProjectRecordToSearchService(Project project) {
         try {
-            log.debug("Notifying project publish to consumers through Kafka -> {}", project.getTitle());
+            log.info("Notifying project publish to consumers through Kafka -> {}", project.getTitle());
             var content = new StringBuilder(project.getTitle())
                     .append(" ")
                     .append(project.getDescription())
@@ -140,6 +148,7 @@ public class ProjectServiceImpl implements ProjectService {
             }
             this.kafkaTemplate.send(topicPublishProject,
                     String.format("{\"id\":%s, \"content\":\"%s\"}", project.getId(), content));
+            log.info("Notified Successfully");
         } catch (Exception e) {
             log.error("Exception while notifying machine config changes {} through Kafka: ", project.getTitle(), e);
         }
