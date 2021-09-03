@@ -5,9 +5,11 @@ On publish, it will push the project record to kafka. It will be consumed by pro
 
 # Prerequisites
 kakfa should up and run on 9092
+
 mariaDB should up and run on 3306
 
-Please use the ENV variable to change the other configurations. Please refer application.yml
+Please use the ENV variable to change the other configurations. Please refer application.yml.
+
 Please use spring profiles to use ENV specific configurations
 
 # To build the project
