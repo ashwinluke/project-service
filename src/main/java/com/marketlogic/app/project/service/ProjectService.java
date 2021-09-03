@@ -2,9 +2,10 @@ package com.marketlogic.app.project.service;
 
 import com.marketlogic.app.project.dto.ProjectDTO;
 import com.marketlogic.app.project.dto.ProjectResponse;
+import org.springframework.data.domain.Pageable;
 
 public interface ProjectService {
-    ProjectResponse findAll(int page, int size);
+    ProjectResponse findAll(Pageable pageable);
 
     ProjectDTO findById(long projectId);
 

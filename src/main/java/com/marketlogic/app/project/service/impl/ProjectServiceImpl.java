@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -46,11 +45,7 @@ public class ProjectServiceImpl implements ProjectService {
     private String topicPublishProject;
 
     @Override
-    public ProjectResponse findAll(int page, int size) {
-        Pageable pageable = PageRequest.of(
-                page,
-                size
-        );
+    public ProjectResponse findAll(Pageable pageable) {
         var pageableProject = projectRepository.findAll(pageable);
         log.debug("Retrieved project successfully!");
         var projectResponse = new ProjectResponse();

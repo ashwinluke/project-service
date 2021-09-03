@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +35,14 @@ public class SectionController {
             @ApiResponse(code = 500, message = "Please contact the owner")})
     public SectionResponse getAllSection(@PathVariable long projectId,
                                          @RequestParam(defaultValue = "1") @ApiParam int page,
-                                         @RequestParam(defaultValue = "25") @ApiParam int size) {
-        Pageable pageable = PageRequest.of(page, size);
+                                         @RequestParam(defaultValue = "25") @ApiParam int size,
+                                         @RequestParam(defaultValue = "id") @ApiParam String sortBy,
+                                         @RequestParam(defaultValue = "false") @ApiParam boolean isAscending) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                isAscending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending()
+        );
         return sectionService.findAll(projectId, pageable);
     }
 
