@@ -6,6 +6,7 @@ import com.marketlogic.app.project.dto.ProjectDTO;
 import com.marketlogic.app.project.dto.ProjectResponse;
 import com.marketlogic.app.project.service.ProjectService;
 import io.swagger.annotations.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/project", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(value = "Endpoints are used to create/update/delete the projects")
+@Slf4j
 public class ProjectController {
 
     @Autowired
@@ -40,6 +42,7 @@ public class ProjectController {
         validateProjectId(projectId <= 0);
         var project = projectService.findById(projectId);
         if (project == null) {
+            log.error("Project not found");
             throw new AppServiceException(ErrorCode.PROJECT_NOT_FOUND);
         } else {
             return ResponseEntity.ok(project);
@@ -53,6 +56,7 @@ public class ProjectController {
             @ApiResponse(code = 500, message = "Please contact the owner")})
     public ResponseEntity<ProjectDTO> createProject(@RequestBody ProjectDTO projectDTO) {
         if (projectDTO == null || StringUtils.isBlank(projectDTO.getTitle())) {
+            log.error("Invalid Project details");
             throw new AppServiceException(ErrorCode.BAD_REQUEST);
         }
         return ResponseEntity.ok(projectService.save(projectDTO));
@@ -96,7 +100,9 @@ public class ProjectController {
     }
 
     private void validateProjectId(boolean isInvalidProject) {
-        if (isInvalidProject)
+        if (isInvalidProject) {
+            log.error("Invalid Project details");
             throw new AppServiceException(ErrorCode.BAD_REQUEST);
+        }
     }
 }
