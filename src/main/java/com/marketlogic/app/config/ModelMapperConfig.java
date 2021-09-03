@@ -3,7 +3,6 @@ package com.marketlogic.app.config;
 import com.marketlogic.app.project.entity.Project;
 import com.marketlogic.app.project.entity.ProjectRecord;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

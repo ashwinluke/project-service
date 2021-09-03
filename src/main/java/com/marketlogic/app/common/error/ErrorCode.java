@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "Project not found"),
+    SECTION_NOT_FOUND(HttpStatus.NOT_FOUND, "Section not found"),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "Invalid input"),
     CONFLICTS(HttpStatus.CONFLICT, "Invalid input");
 

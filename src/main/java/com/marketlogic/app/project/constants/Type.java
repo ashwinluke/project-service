@@ -13,14 +13,14 @@ public enum Type {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public static Type parse(String type) {
         return Arrays.stream(Type.values())
                 .filter(typ -> typ.getName().equals(type))
                 .findFirst().orElseThrow(IllegalArgumentException::new);
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

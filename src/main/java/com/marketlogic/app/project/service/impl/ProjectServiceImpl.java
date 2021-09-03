@@ -65,7 +65,6 @@ public class ProjectServiceImpl implements ProjectService {
             projectResponse.setSize(pageableProject.getSize());
             log.debug("Response prepared successfully!");
         }
-
         return projectResponse;
 
     }

@@ -11,13 +11,13 @@ public enum Status {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public static Status parse(String status) {
         return Arrays.stream(Status.values())
                 .filter(sts -> sts.getName().equals(status))
                 .findFirst().orElseThrow(IllegalArgumentException::new);
+    }
+
+    public String getName() {
+        return name;
     }
 }
