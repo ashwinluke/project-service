@@ -17,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping(value = "/project/{projectId}/section", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(value = "Endpoints are used to create/update/delete the sections")
@@ -46,13 +48,11 @@ public class SectionController {
     public ResponseEntity<SectionDTO> getSectionById(@PathVariable long projectId,
                                                      @PathVariable long sectionId) {
         validateMandatoryIds(projectId <= 0 || sectionId <= 0);
-        var section = sectionService.findByProjectIdAndId(projectId, sectionId);
-        if (section == null) {
-            log.error("Section not found");
-            throw new AppServiceException(ErrorCode.SECTION_NOT_FOUND);
-        } else {
-            return ResponseEntity.ok(section);
-        }
+        return Optional.ofNullable(sectionService.findByProjectIdAndId(projectId, sectionId)).map(ResponseEntity::ok)
+                .orElseThrow(() -> {
+                    log.error("Section not found");
+                    throw new AppServiceException(ErrorCode.SECTION_NOT_FOUND);
+                });
     }
 
     @PostMapping
@@ -62,11 +62,11 @@ public class SectionController {
             @ApiResponse(code = 500, message = "Please contact the owner")})
     public ResponseEntity<SectionDTO> addSectionToTheProject(@PathVariable long projectId,
                                                              @RequestBody SectionDTO sectionDTO) {
-        if (sectionDTO == null) {
-            log.error("Invalid Project details");
-            throw new AppServiceException(ErrorCode.BAD_REQUEST);
-        }
-        return ResponseEntity.ok(sectionService.save(projectId, sectionDTO));
+        return Optional.ofNullable(sectionService.save(projectId, sectionDTO)).map(ResponseEntity::ok)
+                .orElseThrow(() -> {
+                    log.error("Invalid Project details");
+                    throw new AppServiceException(ErrorCode.BAD_REQUEST);
+                });
     }
 
     @PutMapping("/{sectionId}")

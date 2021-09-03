@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping(value = "/project", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(value = "Endpoints are used to create/update/delete the projects")
@@ -40,13 +42,11 @@ public class ProjectController {
             @ApiResponse(code = 500, message = "Please contact the owner")})
     public ResponseEntity<ProjectDTO> getProjectById(@PathVariable long projectId) {
         validateProjectId(projectId <= 0);
-        var project = projectService.findById(projectId);
-        if (project == null) {
-            log.error("Project not found");
-            throw new AppServiceException(ErrorCode.PROJECT_NOT_FOUND);
-        } else {
-            return ResponseEntity.ok(project);
-        }
+        return Optional.ofNullable(projectService.findById(projectId)).map(ResponseEntity::ok)
+                .orElseThrow(() -> {
+                    log.error("Project not found");
+                    throw new AppServiceException(ErrorCode.PROJECT_NOT_FOUND);
+                });
     }
 
     @PostMapping

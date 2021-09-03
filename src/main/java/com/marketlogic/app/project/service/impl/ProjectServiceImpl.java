@@ -117,7 +117,7 @@ public class ProjectServiceImpl implements ProjectService {
             if (projectDTO.getSections().isEmpty()) {
                 project.getSections().clear();
             } else {
-                Set<Section> sections = prepareSectionDetails(projectDTO, project);
+                var sections = prepareSectionDetails(projectDTO, project);
                 project.getSections().clear();
                 project.getSections().addAll(sections);
             }
@@ -189,7 +189,7 @@ public class ProjectServiceImpl implements ProjectService {
     private void sendProjectRecordToSearchService(Project project) {
         try {
             log.info("Notifying project publish to consumers through Kafka -> {}", project.getTitle());
-            StringBuilder content = prepareContent(project);
+            var content = prepareContent(project);
             this.kafkaTemplate.send(topicPublishProject,
                     String.format("{\"id\":%s, \"content\":\"%s\"}", project.getId(), content));
             log.info("Notified Successfully");
